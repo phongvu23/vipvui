@@ -31,7 +31,7 @@
       cursor: move;
     }
 
-    select, button {
+    select, button, input {
       background: gold;
       color: black;
       border: none;
@@ -44,6 +44,21 @@
     #bubble {
       white-space: nowrap;
     }
+
+    .dice-edit {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .dice-edit label {
+      font-size: 14px;
+    }
+
+    .dice-edit input {
+      width: 30px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -54,8 +69,30 @@
   <button id="refreshBtn">🔄 Làm mới</button>
 </div>
 
+<div class="dice-edit">
+  <label for="dice-1">⚀: </label>
+  <input type="text" id="dice-1" value="⚀" maxlength="1">
+  <label for="dice-2">⚁: </label>
+  <input type="text" id="dice-2" value="⚁" maxlength="1">
+  <label for="dice-3">⚂: </label>
+  <input type="text" id="dice-3" value="⚂" maxlength="1">
+  <label for="dice-4">⚃: </label>
+  <input type="text" id="dice-4" value="⚃" maxlength="1">
+  <label for="dice-5">⚄: </label>
+  <input type="text" id="dice-5" value="⚄" maxlength="1">
+  <label for="dice-6">⚅: </label>
+  <input type="text" id="dice-6" value="⚅" maxlength="1">
+</div>
+
 <script>
-  const diceMap = { 1: '⚀', 2: '⚁', 3: '⚂', 4: '⚃', 5: '⚄', 6: '⚅' };
+  let diceMap = { 
+    1: '⚀', 
+    2: '⚁', 
+    3: '⚂', 
+    4: '⚃', 
+    5: '⚄', 
+    6: '⚅' 
+  };
 
   let lastCopied = '';
   const bubble = document.getElementById('bubble');
@@ -69,6 +106,14 @@
     option.text = `Chia ${i} phần`;
     select.appendChild(option);
   }
+
+  // Lắng nghe sự kiện thay đổi biểu tượng xúc xắc
+  document.querySelectorAll('.dice-edit input').forEach((input, index) => {
+    input.addEventListener('input', () => {
+      diceMap[index + 1] = input.value;
+      updateBubble();
+    });
+  });
 
   function parseMd5(md5, parts) {
     const partLength = Math.floor(md5.length / parts);
@@ -97,12 +142,16 @@
         lastCopied = text;
         const { dice, total } = parseMd5(text, parts);
         const result = analyze(total, dice);
-        const icons = dice.map(n => diceMap[n]).join(' ');
-        bubble.innerText = `${icons} → ${result}`;
+        updateBubble(dice, result);
       }
     } catch (e) {
       console.error('Clipboard read failed:', e);
     }
+  }
+
+  function updateBubble(dice = [], result = '') {
+    const icons = dice.map(n => diceMap[n]).join(' ');
+    bubble.innerText = `${icons} → ${result}`;
   }
 
   // Làm mới thủ công
@@ -114,8 +163,7 @@
       const parts = parseInt(select.value);
       const { dice, total } = parseMd5(lastCopied, parts);
       const result = analyze(total, dice);
-      const icons = dice.map(n => diceMap[n]).join(' ');
-      bubble.innerText = `${icons} → ${result}`;
+      updateBubble(dice, result);
     }
   });
 
@@ -146,5 +194,7 @@
   });
 </script>
 
+</body>
+</html>
 </body>
 </html>
